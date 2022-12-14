@@ -11,13 +11,13 @@ import { CreateTaskDto, FilterTasksDto, UpdateTaskInfoDto, UpdateTaskStatusDto, 
 export class TasksService {
   constructor(@InjectRepository(Task) private repo: Repository<Task>) {}
 
-  createTask(dto: CreateTaskDto): Promise<Task> {
+  async createTask(dto: CreateTaskDto): Promise<Task> {
     const task = {
       title: dto.title,
       desc: dto.desc,
     };
 
-    return this.repo.save(task);
+    return await this.repo.save(task);
   }
 
   getFilteredTasks(filter: FilterTasksDto | undefined): Promise<Task[]> {
@@ -73,9 +73,11 @@ export class TasksService {
     return this.updateTask(id, dto);
   }
 
-  async removeTask(id: number): Promise<Task> {
+  async removeTask(id: number): Promise<any> {
     const found = await this.getTask(id);
-    return this.repo.remove(found); // entity
+    // return this.repo.remove(found); // entity
     // return this.repo.delete(found); // affected: 1
+
+    return this.repo.softDelete({ id });
   }
 }
