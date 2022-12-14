@@ -20,20 +20,32 @@ export class TasksService {
     return await this.repo.save(task);
   }
 
-  getFilteredTasks(filter: FilterTasksDto | undefined): Promise<Task[]> {
-    let { search, ...other } = filter;
+  // getFilteredTasks(filter: FilterTasksDto | undefined): Promise<Task[]> {
+  //   let { search, ...other } = filter;
 
-    let selector: any = { ...other };
+  //   let selector: any = { ...other };
+
+  //   if (search) {
+  //     selector.title = Like(`%${search}%`);
+  //   }
+
+  //   return this.repo.findBy(selector);
+  // }
+
+  async getTasks(filter: FilterTasksDto): Promise<Task[]> {
+    const { search, status } = filter;
+
+    const query = this.repo.createQueryBuilder('tasks');
+
+    if (status) query.andWhere('tasks.status = :status', { status });
 
     if (search) {
-      selector.title = Like(`%${search}%`);
+      query.andWhere('tasks.title LIKE :search OR tasks.desc LIKE :search', { search: `%${search}%` });
     }
 
-    return this.repo.findBy(selector);
-  }
-
-  getTasks(): Promise<Task[]> {
-    return this.repo.find();
+    console.log(query.getSql());
+    const result = await query.getMany();
+    return result;
   }
 
   // getTaskById(id: string): Task {

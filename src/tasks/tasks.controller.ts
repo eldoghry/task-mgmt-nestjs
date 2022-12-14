@@ -16,8 +16,8 @@ export class TasksController {
 
   @Get()
   async getTasks(@Query() filter: FilterTasksDto): Promise<Task[]> {
-    if (Object.keys(filter).length) return await this.taskService.getFilteredTasks(filter);
-    return await this.taskService.getTasks();
+    // if (Object.keys(filter).length) return await this.taskService.getFilteredTasks(filter);
+    return await this.taskService.getTasks(filter);
   }
 
   @Get('/:id')
