@@ -1,10 +1,4 @@
-import {
-  IsString,
-  IsNotEmpty,
-  IsOptional,
-  IsIn,
-  IsEnum,
-} from 'class-validator';
+import { IsString, IsNotEmpty, IsOptional, IsIn, IsEnum } from 'class-validator';
 import { TaskStatusEnum } from '../tasks.entity';
 
 export interface UpdateTaskInterface {
@@ -40,7 +34,6 @@ export class FilterTasksDto {
 }
 
 export class UpdateTaskStatusDto {
-  @IsOptional()
   @IsEnum(TaskStatusEnum)
   status: TaskStatusEnum;
 }
