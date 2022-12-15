@@ -4,10 +4,11 @@ import * as bcrypt from 'bcrypt';
 import { UserService } from '../user/user.service';
 import { JwtService } from '@nestjs/jwt';
 import { User } from './../user/user.entity';
+import { ConfigService } from '@nestjs/config';
 
 @Injectable()
 export class AuthService {
-  constructor(private userRepo: UserService, private jwt: JwtService) {}
+  constructor(private userRepo: UserService, private jwt: JwtService, private readonly config: ConfigService) {}
 
   async hashPassword(plainPassword: string, salt: string): Promise<string> {
     return await bcrypt.hash(plainPassword, salt);
@@ -20,13 +21,14 @@ export class AuthService {
 
   generateJwtToken(user: User) {
     const { hash, salt, ...payload } = user;
-    return this.jwt.sign({ ...payload });
+    const jwtOptions = { secret: this.config.get('JWT_SECRET'), expiresIn: this.config.get('JWT_EXPIRE_IN') };
+    return this.jwt.sign({ ...payload }, jwtOptions);
   }
 
   async signUp(dto: AuthCredentialsDto): Promise<{ accessToken: string }> {
     const { password } = dto;
 
-    const salt = await bcrypt.genSalt(10);
+    const salt = await bcrypt.genSalt(+this.config.get('SALT_ROUNDS') || 10);
     const hashPassword = await this.hashPassword(password, salt);
 
     try {
