@@ -1,4 +1,4 @@
-import { Entity, Column, PrimaryGeneratedColumn, CreateDateColumn, UpdateDateColumn , DeleteDateColumn} from 'typeorm';
+import { Entity, Column, PrimaryGeneratedColumn, CreateDateColumn, UpdateDateColumn, DeleteDateColumn } from 'typeorm';
 
 export enum TaskStatusEnum {
   OPEN = 'OPEN',
@@ -27,5 +27,5 @@ export class Task {
   updatedAt: Date;
 
   @DeleteDateColumn()
-  deletedAt: Date
+  deletedAt: Date;
 }
