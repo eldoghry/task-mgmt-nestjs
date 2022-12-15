@@ -1,4 +1,5 @@
-import { Entity, Column, PrimaryGeneratedColumn, CreateDateColumn, UpdateDateColumn, DeleteDateColumn } from 'typeorm';
+import { Entity, Column, PrimaryGeneratedColumn, CreateDateColumn, UpdateDateColumn, DeleteDateColumn, ManyToOne } from 'typeorm';
+import { User } from './../user/user.entity';
 
 export enum TaskStatusEnum {
   OPEN = 'OPEN',
@@ -19,6 +20,9 @@ export class Task {
 
   @Column({ enum: TaskStatusEnum, default: TaskStatusEnum.OPEN })
   status: string;
+
+  @ManyToOne(() => User, (user) => user.tasks)
+  user: User;
 
   @CreateDateColumn()
   createdAt: Date;

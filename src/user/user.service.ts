@@ -26,6 +26,10 @@ export class UserService {
   }
 
   async getAllUsers(): Promise<User[]> {
-    return this.repo.find();
+    return this.repo.find({
+      order: {
+        id: 'ASC',
+      },
+    });
   }
 }

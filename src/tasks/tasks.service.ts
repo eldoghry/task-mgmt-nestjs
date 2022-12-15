@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, UnauthorizedException } from '@nestjs/common';
 import { Task, TaskStatusEnum } from './tasks.entity';
 import { v4 as uuid } from 'uuid';
 import { NotFoundException } from '@nestjs/common/exceptions/not-found.exception';
@@ -6,18 +6,22 @@ import { Repository, Like } from 'typeorm';
 import { InjectRepository } from '@nestjs/typeorm';
 
 import { CreateTaskDto, FilterTasksDto, UpdateTaskInfoDto, UpdateTaskStatusDto, UpdateTaskInterface } from './dto/tasks.dto';
+import { User } from './../user/user.entity';
 
 @Injectable()
 export class TasksService {
   constructor(@InjectRepository(Task) private repo: Repository<Task>) {}
 
-  async createTask(dto: CreateTaskDto): Promise<Task> {
-    const task = {
+  async createTask(dto: CreateTaskDto, user: User): Promise<Task> {
+    const task = await this.repo.save({
       title: dto.title,
       desc: dto.desc,
-    };
+      user,
+    });
 
-    return await this.repo.save(task);
+    delete task.user;
+
+    return task;
   }
 
   // getFilteredTasks(filter: FilterTasksDto | undefined): Promise<Task[]> {
@@ -32,10 +36,12 @@ export class TasksService {
   //   return this.repo.findBy(selector);
   // }
 
-  async getTasks(filter: FilterTasksDto): Promise<Task[]> {
-    const { search, status } = filter;
+  async getTasks(filter: FilterTasksDto, user: User): Promise<Task[]> {
+    const { search, status, withDeleted } = filter;
 
     const query = this.repo.createQueryBuilder('tasks');
+
+    if (user.role !== 'admin') query.where('tasks.userId= :userId', { userId: user.id });
 
     if (status) query.andWhere('tasks.status = :status', { status });
 
@@ -43,50 +49,43 @@ export class TasksService {
       query.andWhere('tasks.title LIKE :search OR tasks.desc LIKE :search', { search: `%${search}%` });
     }
 
-    console.log(query.getSql());
+    if (user.role === 'admin' && Boolean(withDeleted)) query.withDeleted();
+
+    // console.log(query.getSql());
     const result = await query.getMany();
     return result;
   }
 
-  // getTaskById(id: string): Task {
-  //   const idx = this.findTaskIdOrFail(id);
-  //   return this.tasks[idx];
-  // }
-
-  // findTaskIdOrFail(id: string) {
-  //   const idx = this.tasks.findIndex((task) => task.id === id);
-
-  //   if (idx === -1) throw new NotFoundException(`No task with id (${id})`);
-
-  //   return idx;
-  // }
-
-  async getTask(id: number): Promise<Task> {
-    const task = await this.repo.findOneBy({ id });
+  async getTask(id: number, user: User): Promise<Task> {
+    const task = await this.repo.findOne({ where: { id }, relations: ['user'] });
 
     if (!task) throw new NotFoundException(`No task with id (${id})`);
+
+    if (user.role !== 'admin' && (!task.user || task.user.id !== user.id)) throw new UnauthorizedException(`You are not allowed to access this task`);
+
+    delete task.user;
 
     return task;
   }
 
-  private async updateTask(id: number, updateDto: Partial<Task>): Promise<Task> {
-    const task = await this.getTask(id);
+  private async updateTask(id: number, updateDto: Partial<Task>, user: User): Promise<Task> {
+    const task = await this.getTask(id, user);
 
     Object.assign(task, updateDto);
 
     return this.repo.save(task);
   }
 
-  updateTaskInfo(id: number, dto: UpdateTaskInfoDto): Promise<Task> {
-    return this.updateTask(id, dto);
+  updateTaskInfo(id: number, dto: UpdateTaskInfoDto, user: User): Promise<Task> {
+    return this.updateTask(id, dto, user);
   }
 
-  updateTaskStatus(id: number, dto: UpdateTaskStatusDto): Promise<Task> {
-    return this.updateTask(id, dto);
+  updateTaskStatus(id: number, dto: UpdateTaskStatusDto, user: User): Promise<Task> {
+    return this.updateTask(id, dto, user);
   }
 
-  async removeTask(id: number): Promise<any> {
-    const found = await this.getTask(id);
+  async removeTask(id: number, user: User): Promise<any> {
+    const found = await this.getTask(id, user);
     // return this.repo.remove(found); // entity
     // return this.repo.delete(found); // affected: 1
 

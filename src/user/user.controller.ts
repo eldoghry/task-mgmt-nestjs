@@ -20,7 +20,9 @@ export class UserController {
   }
 
   @Get('/:id')
-  async getUsers(@Param('id', ParseIntPipe) id: number): Promise<any> {
+  @UseGuards(RolesGuard)
+  @Roles('admin')
+  async getUser(@Param('id', ParseIntPipe) id: number): Promise<any> {
     return await this.userService.getUserById(id);
   }
 
