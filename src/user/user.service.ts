@@ -16,4 +16,12 @@ export class UserService {
   async getUserByUsername(username: string): Promise<User> {
     return await this.repo.findOneBy({ username });
   }
+
+  async getUser(selector: any) {
+    return await this.repo.findOneBy(selector);
+  }
+
+  async getUserById(id: number) {
+    return this.getUser({ id });
+  }
 }
