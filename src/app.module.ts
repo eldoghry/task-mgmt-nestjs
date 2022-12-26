@@ -5,6 +5,7 @@ import { TasksModule } from './tasks/tasks.module';
 import { UserModule } from './user/user.module';
 import { AuthModule } from './auth/auth.module';
 import { ConfigModule, ConfigService } from '@nestjs/config';
+import { WalletModule } from './wallet/wallet.module';
 import * as path from 'path';
 
 @Module({
@@ -32,6 +33,7 @@ import * as path from 'path';
     TasksModule,
     UserModule,
     AuthModule,
+    WalletModule,
   ],
   controllers: [],
   providers: [],
