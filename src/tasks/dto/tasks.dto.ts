@@ -1,10 +1,16 @@
-import { IsString, IsNotEmpty, IsOptional, IsIn, IsEnum } from 'class-validator';
+import { Type } from 'class-transformer';
+import { IsString, IsNotEmpty, IsOptional, IsIn, IsEnum, IsNumber, ValidateNested } from 'class-validator';
 import { TaskStatusEnum } from '../tasks.entity';
+import { User } from './../../user/user.entity';
 
 export interface UpdateTaskInterface {
   title?: string;
   desc?: string;
   status?: TaskStatusEnum;
+}
+
+class Test {
+  id: number;
 }
 
 export class CreateTaskDto {
@@ -15,6 +21,14 @@ export class CreateTaskDto {
   @IsString()
   @IsNotEmpty()
   desc: string;
+
+  @ValidateNested()
+  @Type(() => Test)
+  test: Test;
+}
+export class TestDto {
+  @IsNumber()
+  id: number;
 }
 
 export class FilterTasksDto {

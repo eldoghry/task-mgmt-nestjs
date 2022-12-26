@@ -43,7 +43,7 @@ export class AuthService {
       return { accessToken };
     } catch (error) {
       if (error.code === '23505') throw new ConflictException('Username already exist');
-      else throw new InternalServerErrorException();
+      else throw error;
     }
   }
 

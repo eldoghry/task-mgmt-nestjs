@@ -3,15 +3,25 @@ import { ParseIntPipe } from '@nestjs/common/pipes';
 import { TasksService } from './tasks.service';
 import { CreateTaskDto, FilterTasksDto, UpdateTaskInfoDto, UpdateTaskStatusDto } from './dto/tasks.dto';
 import { Task } from './tasks.entity';
+import { validate } from 'class-validator';
 
 @Controller('tasks')
 export class TasksController {
   constructor(private taskService: TasksService) {}
 
+  // @Post()
+  // @HttpCode(HttpStatus.CREATED)
+  // async createTask(@Body() dto: CreateTaskDto): Promise<Task> {
+  //   return await this.taskService.createTask(dto);
+  // }
+
   @Post()
   @HttpCode(HttpStatus.CREATED)
-  async createTask(@Body() dto: CreateTaskDto): Promise<Task> {
-    return await this.taskService.createTask(dto);
+  async createTask(@Body() body: any) {
+    // const reqBody: CreateTaskDto = body;
+    // const ob = Object.assign(new CreateTaskDto(), reqBody);
+    // await validate(ob);
+    // return await this.taskService.createTask(dto);
   }
 
   @Get()

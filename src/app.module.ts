@@ -25,7 +25,7 @@ import * as path from 'path';
         password: config.get('DB_PASS'),
         entities: [path.join(__dirname, '/**/*.entity.js')],
         // autoLoadEntities: true,
-        synchronize: config.get('DB_SYNCHRONIZATION'),
+        synchronize: Boolean(config.get('DB_SYNCHRONIZATION')),
       }),
       inject: [ConfigService],
     }),
